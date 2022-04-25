@@ -7,22 +7,25 @@ struct Node
   Node *Left;
   Node *Right;
   int key;
+  int height;
 };
 Node *CreateNode(int data)
 {
-  return new Node{nullptr, nullptr, data};
+  return new Node{nullptr, nullptr, data, 0};
 }
 int GetHeight(Node *root)
 {
-  if (root == NULL)
+  if (root == nullptr)
     return 0;
-  return 1 + max(GetHeight(root->Left), GetHeight(root->Right));
+  return root->height;
 }
 Node *RightRotate(Node *root)
 {
   Node *x = root->Left;
   root->Left = x->Right;
   x->Right = root;
+  x->height = 1 + max(GetHeight(x->Left), GetHeight(x->Right));
+  root->height = 1 + max(GetHeight(root->Left), GetHeight(root->Right));
   return x;
 }
 Node *LeftRotate(Node *root)
@@ -30,10 +33,11 @@ Node *LeftRotate(Node *root)
   Node *x = root->Right;
   root->Right = x->Left;
   x->Left = root;
+  x->height = 1 + max(GetHeight(x->Left), GetHeight(x->Right));
+  root->height = 1 + max(GetHeight(root->Left), GetHeight(root->Right));
   return x;
 }
 Node *Insert(Node *root, int data)
-
 {
   if (root == nullptr)
     return CreateNode(data);
@@ -43,16 +47,15 @@ Node *Insert(Node *root, int data)
   }
   else if (root->key < data)
   {
-     root->Right = Insert(root->Right, data);
-   
+    root->Right = Insert(root->Right, data);
   }
   else
   {
     return root;
   }
-
+  root->height = max(GetHeight(root->Left), GetHeight(root->Right)) + 1;
   int banlance = GetHeight(root->Left) - GetHeight(root->Right);
-  //cout<<banlance<<endl;
+  //cout << banlance << endl;
   if (banlance > 1 && data < root->Left->key)
   {
     // cout<<"{"<<endl;
@@ -77,10 +80,77 @@ Node *Insert(Node *root, int data)
   }
   return root;
 }
-
-Node * DeleteNode(Node * root ,int data)
+Node *MinValueNode(Node *root)
 {
-  // 
+  Node *i = root->Right;
+  while (i->Left != nullptr)
+  {
+    i = i->Left;
+  }
+  return i;
+}
+Node *DeleteNode(Node *root, int data)
+{
+  if (root == nullptr)
+    return root;
+  if (data > root->key)
+  {
+
+    root->Right = DeleteNode(root->Right, data);
+  }
+  else if (data < root->key)
+  {
+
+    root->Left = DeleteNode(root->Left, data);
+  }
+  else
+  {
+
+    if (root->Left == nullptr && root->Right == nullptr)
+    {
+      root = nullptr;
+    }
+    else if (root->Left == nullptr || root->Right == nullptr)
+    {
+      Node *temp = (root->Left != nullptr) ? root->Left : root->Right;
+      *root = *temp;
+      free(temp);
+    }
+    else
+    {
+      Node *min = MinValueNode(root);
+      cout << min->key;
+      root->key = min->key;
+      free(min);
+    }
+  }
+  if (root == nullptr)
+    return root;
+  int banlance = GetHeight(root->Left) - GetHeight(root->Right);
+  // cout<<banlance<<endl;
+  if (banlance > 1 && data < root->Left->key)
+  {
+    // cout<<"{"<<endl;
+    return RightRotate(root);
+  }
+  if (banlance < -1 && data > root->Right->key)
+  {
+    //  cout<<"#"<<endl;
+    return LeftRotate(root);
+  }
+  if (banlance > 1 && data > root->Left->key)
+  {
+    //  cout<<"!"<<endl;
+    root->Left = LeftRotate(root->Left);
+    return RightRotate(root);
+  }
+  if (banlance < -1 && data < root->Right->key)
+  {
+    // cout<<"?"<<endl;
+    root->Right = RightRotate(root->Right);
+    return LeftRotate(root);
+  }
+  return root;
 }
 void print2DUtil(Node *root, int space)
 {
@@ -117,9 +187,10 @@ int main()
   Root = Insert(Root, 30);
   Root = Insert(Root, 25);
   Root = Insert(Root, 69);
-    //   print2DUtil(Root);
-    // cout<<endl<<endl;
+  //   print2DUtil(Root);
+  // cout<<endl<<endl;
   Root = Insert(Root, 23);
+  // Root = DeleteNode(Root,18);
   print2DUtil(Root);
   return 0;
 }

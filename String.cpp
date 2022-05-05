@@ -68,19 +68,40 @@ void calcFreq(string str, int n)
     for (map<char, int>::iterator v = freq.begin(); v != freq.end(); v++)
       cout<<v->first<< v->second<<endl;
 }
+string decode(struct MinHeapNode* root, string s)
+{
+    string ans = "";
+    struct MinHeapNode* curr = root;
+    for (int i=0;i<s.size();i++)
+    {
+        if (s[i] == '0')
+           curr = curr->left;
+        else
+           curr = curr->right;
+  
+        
+        if (curr->left==NULL and curr->right==NULL)
+        {
+            ans += curr->data;
+            curr = root;
+        }
+    }
+    
+    return ans+'\0';
+}
 int main()
 {
     string str = "gddgfgdgfds";
     string encodedString, decodedString;
     calcFreq(str, str.length());
-    // HuffmanCodes(str.length());
-    // for (auto v = codes.begin(); v != codes.end(); v++)
-    //     cout << v->first << ' ' << v->second << endl;
+     HuffmanCodes(str.length());
+    for (auto v = codes.begin(); v != codes.end(); v++)
+        cout << v->first << ' ' << v->second << endl;
 
-    // for (auto i : str)
-    //     encodedString += codes[i];
+    for (auto i : str)
+        encodedString += codes[i];
 
-    // cout << encodedString << endl;
-
+    cout << encodedString << endl;
+    cout<<decode(minHeap.top(),encodedString);
     return 0;
 }
